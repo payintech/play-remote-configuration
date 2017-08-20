@@ -1,0 +1,19 @@
+language: java
+
+jdk:
+    - oraclejdk8
+
+before_script:
+    - wget "https://releases.hashicorp.com/consul/0.9.2/consul_0.9.2_linux_amd64.zip"
+    - unzip "consul_0.9.2_linux_amd64.zip"
+    - ./consul agent --dev&
+
+script:
+    - mvn compile
+    - curl "http://127.0.0.1:8500/v1/kv/test/db.default.driver" -d "org.postgresql.Driver" -X PUT
+    - curl "http://127.0.0.1:8500/v1/kv/test/db/default/driver2" -d "org.postgresql.Driver" -X PUT
+    - curl "http://127.0.0.1:8500/v1/kv/test/db/default/timeout" -d "5000" -X PUT
+    - curl "http://127.0.0.1:8500/v1/kv/test/db/default/excludedIds" -d "[1,2,3,4,5]" -X PUT
+    - curl "http://127.0.0.1:8500/v1/kv/test/db/default/disabled" -d "false" -X PUT
+    - curl "http://127.0.0.1:8500/v1/kv/my/key" -d "Hello World" -X PUT
+    - mvn test
