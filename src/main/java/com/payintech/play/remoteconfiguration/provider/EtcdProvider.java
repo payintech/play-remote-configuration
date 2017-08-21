@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.Mode;
 
@@ -34,51 +35,85 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Base64;
 
 /**
- * Configuration provider implementation for HashiCorp Consul.
+ * Configuration provider implementation for CoreOS etcd.
  *
  * @author Thibault Meyer
  * @version 17.08.21
- * @since 17.08.20
+ * @since 17.08.21
  */
-public final class ConsulProvider implements RemoteConfigProvider {
+public class EtcdProvider implements RemoteConfigProvider {
 
     @Override
     public String getShortName() {
-        return "CONSUL";
+        return "ETCD";
     }
 
     @Override
     public String getName() {
-        return "HashiCorp Consul";
+        return "CoreOS etcd";
+    }
+
+    /**
+     * Explore the Json document to retrieve valid Key/Value couples.
+     *
+     * @param prefix        The key prefix to remove
+     * @param stringBuilder The buffer to put configuration
+     * @param jsonNode      The Json node to explore
+     * @since 17.08.21
+     */
+    private void exploreJsonNode(final String prefix, final StringBuilder stringBuilder, final JsonNode jsonNode) {
+        for (final JsonNode entry : jsonNode) {
+            if (entry.hasNonNull("dir") && entry.get("dir").asBoolean()) {
+                this.exploreJsonNode(prefix, stringBuilder, entry.get("nodes"));
+            } else if (entry.hasNonNull("value")) {
+                if (prefix.isEmpty()) {
+                    stringBuilder.append(
+                        StringUtils.removeFirst(
+                            entry.get("key").asText(),
+                            "/"
+                        ).replace("/", ".")
+                    );
+                } else {
+                    stringBuilder.append(
+                        entry.get("key")
+                            .asText()
+                            .replace("/" + prefix + "/", "")
+                            .replace("/", ".")
+                    );
+                }
+                stringBuilder.append(" = ");
+                stringBuilder.append(
+                    entry.get("value").asText()
+                );
+                stringBuilder.append('\n');
+            }
+        }
     }
 
     @Override
     public Config loadConfiguration(final Mode mode, final Config localConfig) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder(1024);
-        final String consulAccessToken = localConfig.getString("remote-configuration.consul.authToken");
-        String consulEndpoint = localConfig.getString("remote-configuration.consul.endpoint");
-        String consulPrefix = localConfig.getString("remote-configuration.consul.prefix").trim();
-        if (consulEndpoint != null && consulEndpoint.startsWith("http")) {
-            if (!consulEndpoint.endsWith("/")) {
-                consulEndpoint += "/";
+        String etcdEndpoint = localConfig.getString("remote-configuration.etcd.endpoint");
+        String etcdPrefix = localConfig.getString("remote-configuration.etcd.prefix").trim();
+        if (etcdEndpoint != null && etcdEndpoint.startsWith("http")) {
+            if (!etcdEndpoint.endsWith("/")) {
+                etcdEndpoint += "/";
             }
-            if (consulPrefix.endsWith("/")) {
-                consulPrefix = consulPrefix.substring(0, consulPrefix.length() - 1);
+            if (etcdPrefix.endsWith("/")) {
+                etcdPrefix = etcdPrefix.substring(0, etcdPrefix.length() - 1);
             }
-            if (consulPrefix.startsWith("/")) {
-                consulPrefix = consulPrefix.substring(1, consulPrefix.length());
+            if (etcdPrefix.startsWith("/")) {
+                etcdPrefix = etcdPrefix.substring(1, etcdPrefix.length());
             }
             InputStream is = null;
             try {
                 final URL consulUrl = new URL(
                     String.format(
-                        "%sv1/kv/%s/?recurse&token=%s",
-                        consulEndpoint,
-                        consulPrefix,
-                        consulAccessToken
+                        "%sv2/keys/%s?recursive=true",
+                        etcdEndpoint,
+                        etcdPrefix
                     )
                 );
                 Logger.debug("Provider {}> {}", this.getName(), consulUrl.toString());
@@ -87,26 +122,12 @@ public final class ConsulProvider implements RemoteConfigProvider {
                 if (conn.getResponseCode() / 100 == 2) {
                     is = conn.getInputStream();
                     final ObjectMapper mapper = new ObjectMapper();
-                    final JsonNode jsonDocument = mapper.readTree(is);
-                    final Base64.Decoder decoder = Base64.getDecoder();
-                    for (final JsonNode entry : jsonDocument) {
-                        if (entry.hasNonNull("Value")) {
-                            stringBuilder.append(
-                                entry.get("Key")
-                                    .asText()
-                                    .replace(consulPrefix.isEmpty() ? "" : consulPrefix + "/", "")
-                                    .replace("/", ".")
-                            );
-                            stringBuilder.append(" = ");
-                            stringBuilder.append(
-                                new String(
-                                    decoder.decode(
-                                        entry.get("Value").asText()
-                                    )
-                                )
-                            );
-                            stringBuilder.append('\n');
-                        }
+                    JsonNode jsonNode = mapper.readTree(is).get("node");
+                    if (jsonNode.get("dir").asBoolean()) {
+                        jsonNode = jsonNode.get("nodes");
+                        this.exploreJsonNode(etcdPrefix, stringBuilder, jsonNode);
+                    } else {
+                        Logger.warn("Provider {} prefix must reference a directory", this.getName());
                     }
                 } else {
                     Logger.warn("Provider {} return non 200 status: {}", this.getName(), conn.getResponseCode());

@@ -7,6 +7,10 @@ before_script:
     - wget "https://releases.hashicorp.com/consul/0.9.2/consul_0.9.2_linux_amd64.zip"
     - unzip "consul_0.9.2_linux_amd64.zip"
     - ./consul agent --dev&
+    - wget "https://github.com/coreos/etcd/releases/download/v3.2.5/etcd-v3.2.5-linux-amd64.tar.gz"
+    - tar xf "etcd-v3.2.5-linux-amd64.tar.gz"
+    - mv etcd-v3.2.5-linux-amd64 etcd
+    - ./etcd/etcd&
 
 script:
     - mvn compile
@@ -16,4 +20,10 @@ script:
     - curl "http://127.0.0.1:8500/v1/kv/test/db/default/excludedIds" -d "[1,2,3,4,5]" -X PUT
     - curl "http://127.0.0.1:8500/v1/kv/test/db/default/disabled" -d "false" -X PUT
     - curl "http://127.0.0.1:8500/v1/kv/my/key" -d "Hello World" -X PUT
+    - ./etcd/etcdctl set "test/db.default.driver" "org.postgresql.Driver"
+    - ./etcd/etcdctl set "test/db/default/driver2" "org.postgresql.Driver"
+    - ./etcd/etcdctl set "test/db/default/timeout" "5000"
+    - ./etcd/etcdctl set "test/db/default/excludedIds" "[1,2,3,4,5]"
+    - ./etcd/etcdctl set "test/db/default/disabled" "false"
+    - ./etcd/etcdctl set "my/key" "Hello World"
     - mvn test
