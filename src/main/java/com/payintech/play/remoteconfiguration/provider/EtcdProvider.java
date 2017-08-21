@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Base64;
 
 /**
  * Configuration provider implementation for CoreOS etcd.
@@ -118,6 +119,17 @@ public class EtcdProvider implements RemoteConfigProvider {
                 );
                 Logger.debug("Provider {}> {}", this.getName(), consulUrl.toString());
                 final HttpURLConnection conn = (HttpURLConnection) consulUrl.openConnection();
+                if (localConfig.hasPath("remote-configuration.etcd.username")
+                    && localConfig.hasPath("remote-configuration.etcd.password")) {
+                    final String username = localConfig.getString("remote-configuration.etcd.username");
+                    final String password = localConfig.getString("remote-configuration.etcd.password");
+                    if (!username.isEmpty()) {
+                        final String basicAuth = "Basic " + Base64.getEncoder().encodeToString(
+                            (username + ":" + password).getBytes()
+                        );
+                        conn.setRequestProperty("Authorization", basicAuth);
+                    }
+                }
                 conn.setConnectTimeout(1500);
                 if (conn.getResponseCode() / 100 == 2) {
                     is = conn.getInputStream();

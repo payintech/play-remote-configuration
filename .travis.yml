@@ -26,4 +26,6 @@ script:
     - ./etcd/etcdctl set "test/db/default/excludedIds" "[1,2,3,4,5]"
     - ./etcd/etcdctl set "test/db/default/disabled" "false"
     - ./etcd/etcdctl set "my/key" "Hello World"
+    - echo -e "123456" | ./etcd/etcdctl user add root
+    - ./etcd/etcdctl auth enable
     - mvn test

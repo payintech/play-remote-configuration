@@ -58,6 +58,8 @@ public class EtcdTest {
             new HashMap<String, Object>() {{
                 put("remote-configuration.provider", "ETCD");
                 put("remote-configuration.etcd.prefix", prefix);
+                put("remote-configuration.etcd.username", "root");
+                put("remote-configuration.etcd.password", "123456");
             }}
         )).build();
     }
