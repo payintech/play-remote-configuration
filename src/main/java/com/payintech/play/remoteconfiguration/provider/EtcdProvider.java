@@ -41,7 +41,8 @@ import java.util.Base64;
  * Configuration provider implementation for CoreOS etcd.
  *
  * @author Thibault Meyer
- * @version 17.08.21
+ * @author Pierre Adam
+ * @version 17.11.24
  * @since 17.08.21
  */
 public class EtcdProvider implements RemoteConfigProvider {
@@ -112,7 +113,7 @@ public class EtcdProvider implements RemoteConfigProvider {
             try {
                 final URL consulUrl = new URL(
                     String.format(
-                        "%sv2/keys/%s?recursive=true",
+                        "%sv2/keys/%s/?recursive=true",
                         etcdEndpoint,
                         etcdPrefix
                     )
