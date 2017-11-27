@@ -1,7 +1,7 @@
 # Play Remote Configuration
 
 
-[![Latest release](https://img.shields.io/badge/latest_release-17.08-orange.svg)](https://github.com/payintech/play-remote-configuration/releases)
+[![Latest release](https://img.shields.io/badge/latest_release-17.11-orange.svg)](https://github.com/payintech/play-remote-configuration/releases)
 [![JitPack](https://jitpack.io/v/payintech/play-remote-configuration.svg)](https://jitpack.io/#payintech/play-remote-configuration)
 [![Build](https://img.shields.io/travis-ci/payintech/play-remote-configuration.svg?branch=master&style=flat)](https://travis-ci.org/payintech/play-remote-configuration)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/payintech/play-remote-configuration/master/LICENSE)
