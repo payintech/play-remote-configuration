@@ -1,3 +1,3 @@
 com.payintech.play.remoteconfiguration.provider.ConsulProvider
 com.payintech.play.remoteconfiguration.provider.EtcdProvider
-com.payintech.play.remoteconfiguration.provider.HttpProvider
+com.payintech.play.remoteconfiguration.provider.HttpBasicProvider

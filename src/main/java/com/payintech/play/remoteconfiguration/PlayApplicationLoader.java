@@ -37,7 +37,7 @@ import java.util.ServiceLoader;
  * retrieved configuration into the local configuration.
  *
  * @author Thibault Meyer
- * @version 17.08.21
+ * @version 17.12.16
  * @since 17.08.20
  */
 public class PlayApplicationLoader extends GuiceApplicationLoader {
@@ -76,7 +76,9 @@ public class PlayApplicationLoader extends GuiceApplicationLoader {
                     context.environment().mode(),
                     localConfiguration
                 );
-                Logger.debug("Remote Configuration> {}", remoteConfiguration.root().render());
+                if (Logger.isDebugEnabled()) {
+                    Logger.debug("Remote Configuration> {}", remoteConfiguration.root().render());
+                }
                 return this.initialBuilder
                     .in(context.environment())
                     .loadConfig(remoteConfiguration.withFallback(localConfiguration))

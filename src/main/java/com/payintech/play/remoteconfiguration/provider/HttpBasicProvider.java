@@ -35,19 +35,19 @@ import java.net.URL;
  * Configuration provider implementation for simple HTTP.
  *
  * @author Thibault Meyer
- * @version 17.11.28
+ * @version 17.12.16
  * @since 17.11.28
  */
-public class HttpProvider implements RemoteConfigProvider {
+public class HttpBasicProvider implements RemoteConfigProvider {
 
     @Override
     public String getShortName() {
-        return "HTTP";
+        return "HTTP_BASIC";
     }
 
     @Override
     public String getName() {
-        return "HTTP";
+        return "HTTP (Basic Implementation)";
     }
 
     @Override

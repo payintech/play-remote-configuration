@@ -1,7 +1,7 @@
 # Play Remote Configuration
 
 
-[![Latest release](https://img.shields.io/badge/latest_release-17.11-orange.svg)](https://github.com/payintech/play-remote-configuration/releases)
+[![Latest release](https://img.shields.io/badge/latest_release-17.12-orange.svg)](https://github.com/payintech/play-remote-configuration/releases)
 [![JitPack](https://jitpack.io/v/payintech/play-remote-configuration.svg)](https://jitpack.io/#payintech/play-remote-configuration)
 [![Build](https://img.shields.io/travis-ci/payintech/play-remote-configuration.svg?branch=master&style=flat)](https://travis-ci.org/payintech/play-remote-configuration)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/payintech/play-remote-configuration/master/LICENSE)
@@ -18,10 +18,11 @@ configuration with a Play Framework application.
 
 By default, the following providers are provided:
 
-| Short name | Name             |  Basic authentication  |
-|------------|------------------|:----------------------:|
-| CONSUL     | HashiCorp Consul |           ✓            |
-| ETCD       | CoreOS etcd      |           ✓            |
+| Short name | Name                        |  Basic authentication  |
+|------------|-----------------------------|:----------------------:|
+| CONSUL     | HashiCorp Consul            |           ✓            |
+| ETCD       | CoreOS etcd                 |           ✓            |
+| HTTP_BASIC | HTTP (Basic Implementation) |           ✓            |
 
 
 ## Add play-remote-configuration to your project
@@ -56,6 +57,7 @@ play {
 }
 ```
 
+
 #### ApplicationLoader.java (second way)
 
 ```java
@@ -81,7 +83,9 @@ remote-configuration {
   ## Provider to use
   # Short name of the provider to use to retrieve remote
   # configuration. Built-in available providers are:
-  #  - CONSUL    (HashiCorp Consul)
+  #  - CONSUL        (HashiCorp Consul)
+  #  - ETCD          (CoreOS etcd)
+  #  - HTTP_BASIC    (HTTP - Basic Implementation)
   # ~~~~~
   provider = ""
   provider = ${?RCONF_PROVIDER}
@@ -89,24 +93,24 @@ remote-configuration {
   ## HashiCorp Consul
   # ~~~~~
   consul {
-  
+
     # API endpoint. HTTPS endpoint could be used,
     # but the SSL certificate must be valid
     endpoint = "http://127.0.0.1:8500/"
     endpoint = ${?RCONF_CONSUL_ENDPOINT}
-    
+
     # Authentication token. If ACL are anabled on
     # your Consul cluster, this variable allow you
     # to set the token to use with each API calls
     authToken = ""
     authToken = ${?RCONF_CONSUL_AUTHTOKEN}
-    
+
     # Prefix. Get only values with key beginning
     # with the configured prefix
     prefix = "/"
     prefix = ${?RCONF_CONSUL_PREFIX}
   }
-  
+
   ## CoreOS etcd
   # ~~~~~
   etcd {
@@ -128,6 +132,18 @@ remote-configuration {
     # must be a directory.
     prefix = "/"
     prefix = ${?RCONF_ETCD_PREFIX}
-  }  
+  }
+
+
+  ## HTTP
+  # ~~~~~
+  http {
+
+    # URL of the configuration file to retrieve. HTTPS
+    # endpoint could be used, but the SSL certificate
+    # must be valid
+    url = "http://127.0.0.1/playcfg/application.conf"
+    url = ${?RCONF_HTTP_ENDPOINT}
+  }
 }
 ```
