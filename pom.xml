@@ -6,7 +6,7 @@
 
     <groupId>com.payintech</groupId>
     <artifactId>play-remote-configuration</artifactId>
-    <version>17.11</version>
+    <version>17.12</version>
     <name>Play Remote Configuration</name>
     <description>Remote configuration for Play Framework 2</description>
     <url>https://github.com/payintech/play-remote-configuration</url>
