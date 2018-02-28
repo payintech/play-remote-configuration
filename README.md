@@ -67,7 +67,7 @@ public class ApplicationLoader extends PlayApplicationLoader {
 
     @Override
     public GuiceApplicationBuilder builder(final Context context) {
-        final GuiceApplicationBuilder newInitialBuilder = super.builder();
+        final GuiceApplicationBuilder newInitialBuilder = super.builder(context);
         // Your custom code
         return newInitialBuilder;
     }
